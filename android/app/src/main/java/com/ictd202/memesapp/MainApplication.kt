@@ -1,4 +1,4 @@
-package com.mobileapp
+package com.ictd202.memesapp
 
 import android.app.Application
 import com.facebook.react.PackageList
