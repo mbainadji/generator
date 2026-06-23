@@ -10,8 +10,7 @@ import Share from 'react-native-share';
 import ViewShot, { ViewShotRef } from 'react-native-view-shot';
 import { useShareIntent, getInitialShare, ShareIntentUtils, SharePayload } from 'react-native-nitro-share-intent';
 
-// IP locale de ta machine Kali avec le port du serveur backend
-const API_URL = 'http://192.168.88.151:3000/api';
+const API_URL = 'http://192.168.88.240:3000/api';
 
 type Tab = 'texte' | 'voix' | 'image';
 
@@ -26,7 +25,6 @@ export default function MemeCreatorScreen() {
   const [isRecording, setIsRecording] = useState(false);
   const viewShotRef = React.useRef<ViewShotRef>(null);
 
-  // BONUS: Réception d'un partage entrant (texte ou image) depuis une autre app
   const handleIncomingShare = (payload: SharePayload) => {
     if (ShareIntentUtils.isTextShare(payload) && payload.text) {
       setTextContext(payload.text);
@@ -40,17 +38,14 @@ export default function MemeCreatorScreen() {
     }
   };
 
-  // Partage reçu pendant que l'app est déjà ouverte
   useShareIntent(handleIncomingShare);
 
-  // Partage reçu au lancement de l'app (cold start via le menu "Partager")
   useEffect(() => {
     getInitialShare().then((initial) => {
       if (initial) handleIncomingShare(initial);
     });
   }, []);
 
-  // Initialisation des options d'enregistrement audio natif au démarrage
   useEffect(() => {
     const setupAudio = async () => {
       if (Platform.OS === 'android') {
@@ -79,7 +74,6 @@ export default function MemeCreatorScreen() {
     setupAudio();
   }, []);
 
-  // CORE 1: Context Reader (Envoi de texte à Gemini)
   const handleTextSubmit = async () => {
     if (!textContext.trim()) return;
     setLoading(true);
@@ -99,7 +93,6 @@ export default function MemeCreatorScreen() {
     }
   };
 
-  // CORE 2: Voice-to-Meme (Gestion du Micro via react-native-audio-record)
   const startRecording = () => {
     try {
       setIsRecording(true);
@@ -114,9 +107,7 @@ export default function MemeCreatorScreen() {
     try {
       setIsRecording(false);
       const audioFileUri = await AudioRecord.stop();
-      if (audioFileUri) {
-        sendAudioToBackend(audioFileUri);
-      }
+      if (audioFileUri) sendAudioToBackend(audioFileUri);
     } catch (err) {
       Alert.alert('Erreur', 'Échec de la récupération du fichier audio.');
     }
@@ -131,7 +122,6 @@ export default function MemeCreatorScreen() {
       type: 'audio/wav',
       name: 'voice_meme.wav',
     } as any);
-
     try {
       const response = await fetch(`${API_URL}/voice-to-meme`, {
         method: 'POST',
@@ -148,7 +138,6 @@ export default function MemeCreatorScreen() {
     }
   };
 
-  // CORE 3: Status Remixer (Galerie)
   const pickImage = () => {
     launchImageLibrary({ mediaType: 'photo', quality: 1 }, (response) => {
       if (response.assets && response.assets[0] && response.assets[0].uri) {
@@ -157,7 +146,6 @@ export default function MemeCreatorScreen() {
     });
   };
 
-  // BONUS: Génération d'image par IA (Gemini Nano Banana)
   const generateImageAI = async () => {
     if (!imagePrompt.trim()) return;
     setGeneratingImage(true);
@@ -180,7 +168,6 @@ export default function MemeCreatorScreen() {
     }
   };
 
-  // BONUS: Partage Natif Intégré
   const shareMeme = async () => {
     try {
       if (!viewShotRef.current || !viewShotRef.current.capture) return;
@@ -206,8 +193,6 @@ export default function MemeCreatorScreen() {
     <View style={styles.screen}>
       <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
         <Text style={styles.title}>🎭 G2 Meme Multimodal</Text>
-
-        {/* Barre d'onglets */}
         <View style={styles.tabBar}>
           {tabs.map((t) => (
             <TouchableOpacity
@@ -221,15 +206,13 @@ export default function MemeCreatorScreen() {
             </TouchableOpacity>
           ))}
         </View>
-
-        {/* Carte de contenu selon l'onglet actif */}
         <View style={styles.card}>
           {activeTab === 'texte' && (
             <>
               <Text style={styles.cardLabel}>Colle un extrait de discussion</Text>
               <TextInput
                 style={styles.input}
-                placeholder={`Ex: « Frère je te jure j'avais dit à 18h, là il est 21h et tu m'appelles pour me dire que tu sors de la maison... »`}
+                placeholder={`Ex: « Frère je te jure j'avais dit à 18h... »`}
                 placeholderTextColor="#6b6b7a"
                 value={textContext}
                 onChangeText={setTextContext}
@@ -240,13 +223,10 @@ export default function MemeCreatorScreen() {
               </TouchableOpacity>
             </>
           )}
-
           {activeTab === 'voix' && (
             <>
               <Text style={styles.cardLabel}>Enregistre ta voix</Text>
-              <Text style={styles.cardHint}>
-                Raconte la situation à voix haute, l'IA transcrit et génère le mème.
-              </Text>
+              <Text style={styles.cardHint}>Raconte la situation à voix haute, l'IA transcrit et génère le mème.</Text>
               <TouchableOpacity
                 style={[styles.forgeBtn, isRecording && styles.forgeBtnRecording]}
                 onPress={isRecording ? stopRecording : startRecording}
@@ -257,7 +237,6 @@ export default function MemeCreatorScreen() {
               </TouchableOpacity>
             </>
           )}
-
           {activeTab === 'image' && (
             <>
               <Text style={styles.cardLabel}>Choisis une image de fond</Text>
@@ -267,7 +246,6 @@ export default function MemeCreatorScreen() {
               <TouchableOpacity style={styles.forgeBtn} onPress={pickImage}>
                 <Text style={styles.forgeBtnText}>🖼️  Choisir depuis la galerie</Text>
               </TouchableOpacity>
-
               <Text style={[styles.cardLabel, { marginTop: 20 }]}>Ou génère-la avec l'IA</Text>
               <TextInput
                 style={styles.input}
@@ -289,26 +267,18 @@ export default function MemeCreatorScreen() {
             </>
           )}
         </View>
-
-        {/* Chargement */}
         {loading && <ActivityIndicator size="large" color="#15397F" style={{ marginTop: 24 }} />}
-
-        {/* Rendu final du Mème */}
         {memeResult && !loading && (
           <View style={styles.memeContainer}>
-            {/* IMPORTANT: ViewShot a besoin d'un style explicite (largeur définie)
-                sinon le pourcentage width:'100%' de l'Image ne peut pas se résoudre,
-                et la capture native peut échouer sous Fabric (New Architecture). */}
-            <ViewShot
-              ref={viewShotRef}
-              options={{ format: 'jpg', quality: 0.9 }}
-              style={styles.memeShot}
-            >
+            <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 0.9 }} style={styles.memeShot}>
               <Text style={styles.memeTopText}>{memeResult.topText?.toUpperCase()}</Text>
-              <Image
-                source={{ uri: selectedImage || 'https://unsplash.com' }}
-                style={styles.memeImage}
-              />
+              {selectedImage ? (
+                <Image source={{ uri: selectedImage }} style={styles.memeImage} />
+              ) : (
+                <View style={[styles.memeImage, { backgroundColor: '#1a1a2e', justifyContent: 'center', alignItems: 'center' }]}>
+                  <Text style={{ color: '#ffffff55', fontSize: 12 }}>Aucune image — onglet Image pour en ajouter une</Text>
+                </View>
+              )}
               <Text style={styles.memeBottomText}>{memeResult.bottomText?.toUpperCase()}</Text>
             </ViewShot>
             <TouchableOpacity style={styles.shareBtn} onPress={shareMeme}>
@@ -321,7 +291,6 @@ export default function MemeCreatorScreen() {
   );
 }
 
-// Palette à 3 couleurs : rouge, bleu, blanc
 const RED = '#D7263D';
 const BLUE = '#15397F';
 const WHITE = '#FFFFFF';
@@ -332,81 +301,22 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: WHITE },
   container: { flex: 1, backgroundColor: WHITE, padding: 18 },
   title: { fontSize: 20, fontWeight: '800', textAlign: 'center', marginVertical: 16, color: BLUE },
-
-  // Barre d'onglets (pill style)
-  tabBar: {
-    flexDirection: 'row',
-    backgroundColor: WHITE,
-    borderRadius: 999,
-    padding: 4,
-    borderWidth: 2,
-    borderColor: BLUE,
-    marginBottom: 18,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: 'center',
-    borderRadius: 999,
-  },
+  tabBar: { flexDirection: 'row', backgroundColor: WHITE, borderRadius: 999, padding: 4, borderWidth: 2, borderColor: BLUE, marginBottom: 18 },
+  tab: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 999 },
   tabActive: { backgroundColor: BLUE },
   tabText: { color: BLUE, fontWeight: '600', fontSize: 13 },
   tabTextActive: { color: WHITE, fontWeight: '800' },
-
-  // Carte de contenu
-  card: {
-    backgroundColor: WHITE,
-    padding: 18,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: BORDER,
-    marginBottom: 18,
-  },
+  card: { backgroundColor: WHITE, padding: 18, borderRadius: 16, borderWidth: 2, borderColor: BORDER, marginBottom: 18 },
   cardLabel: { fontSize: 15, fontWeight: '700', marginBottom: 10, color: BLUE },
   cardHint: { fontSize: 13, color: MUTED, marginBottom: 16 },
-  input: {
-    backgroundColor: WHITE,
-    borderWidth: 2,
-    borderColor: BORDER,
-    borderRadius: 10,
-    padding: 12,
-    minHeight: 100,
-    textAlignVertical: 'top',
-    color: '#1a1a1a',
-    fontSize: 14,
-  },
-
-  // Bouton principal rouge "Forger le meme"
-  forgeBtn: {
-    backgroundColor: RED,
-    paddingVertical: 14,
-    borderRadius: 999,
-    marginTop: 16,
-    alignItems: 'center',
-  },
-  // État actif (enregistrement en cours) en bleu, pour contraster avec le rouge au repos
+  input: { backgroundColor: WHITE, borderWidth: 2, borderColor: BORDER, borderRadius: 10, padding: 12, minHeight: 100, textAlignVertical: 'top', color: '#1a1a1a', fontSize: 14 },
+  forgeBtn: { backgroundColor: RED, paddingVertical: 14, borderRadius: 999, marginTop: 16, alignItems: 'center' },
   forgeBtnRecording: { backgroundColor: BLUE },
   forgeBtnText: { color: WHITE, fontWeight: '800', fontSize: 15 },
-
-  // Rendu du mème
-  memeContainer: {
-    backgroundColor: BLUE,
-    padding: 10,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 4,
-  },
+  memeContainer: { backgroundColor: BLUE, padding: 10, borderRadius: 12, alignItems: 'center', marginTop: 4 },
   memeShot: { width: '100%' },
   memeImage: { width: '100%', height: 300, resizeMode: 'cover', opacity: 0.85 },
-  memeTopText: {
-    color: WHITE, fontSize: 18, fontWeight: 'bold', textAlign: 'center',
-    position: 'absolute', top: 25, zIndex: 10, width: '90%', alignSelf: 'center',
-    textShadowColor: '#000', textShadowRadius: 6,
-  },
-  memeBottomText: {
-    color: WHITE, fontSize: 18, fontWeight: 'bold', textAlign: 'center',
-    position: 'absolute', bottom: 25, zIndex: 10, width: '90%', alignSelf: 'center',
-    textShadowColor: '#000', textShadowRadius: 6,
-  },
+  memeTopText: { color: WHITE, fontSize: 18, fontWeight: 'bold', textAlign: 'center', position: 'absolute', top: 25, zIndex: 10, width: '90%', alignSelf: 'center', textShadowColor: '#000', textShadowRadius: 6 },
+  memeBottomText: { color: WHITE, fontSize: 18, fontWeight: 'bold', textAlign: 'center', position: 'absolute', bottom: 25, zIndex: 10, width: '90%', alignSelf: 'center', textShadowColor: '#000', textShadowRadius: 6 },
   shareBtn: { backgroundColor: RED, padding: 12, borderRadius: 999, marginTop: 12, width: '100%', alignItems: 'center' },
 });
