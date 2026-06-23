@@ -10,7 +10,7 @@ import Share from 'react-native-share';
 import ViewShot, { ViewShotRef } from 'react-native-view-shot';
 import { useShareIntent, getInitialShare, ShareIntentUtils, SharePayload } from 'react-native-nitro-share-intent';
 
-const API_URL = 'http://192.168.88.240:3000/api';
+const API_URL = 'https://meme-backend-b8b1.onrender.com/api';
 
 type Tab = 'texte' | 'voix' | 'image';
 
