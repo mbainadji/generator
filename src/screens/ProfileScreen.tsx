@@ -7,7 +7,7 @@ const BLUE = '#15397F';
 const RED = '#D7263D';
 const WHITE = '#FFFFFF';
 
-const APP_LINK_BASE = 'https://memeapp-ictd.web.app/msg';
+const APP_LINK_BASE = 'https://meme-ictd-anonyme.web.app/msg';
 
 export default function ProfileScreen() {
   const user = getAuth().currentUser;

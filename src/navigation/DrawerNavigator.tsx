@@ -11,6 +11,7 @@ import ProfileScreen from '../screens/ProfileScreen';
 import InboxScreen from '../screens/anonymous/InboxScreen';
 import SentScreen from '../screens/anonymous/SentScreen';
 import AdminScreen from '../screens/anonymous/AdminScreen';
+import StickerScreen from '../screens/StickerScreen';
 
 const Drawer = createDrawerNavigator();
 const BLUE = '#15397F';
@@ -35,6 +36,7 @@ function CustomDrawerContent(props: any) {
         { label: '🎭  Accueil', screen: 'Accueil' },
         { label: '👤  Profil', screen: 'Profil' },
         { label: '📥  Boîte de réception', screen: 'Réception' },
+        { label: '🎨  Créateur de Sticker', screen: 'Sticker' },
         { label: '📤  Messages envoyés', screen: 'Envoyés' },
       ].map(item => (
         <TouchableOpacity
@@ -80,6 +82,7 @@ export default function DrawerNavigator() {
         <Drawer.Screen name="Profil" component={ProfileScreen} options={{ title: '👤 Mon Profil' }} />
         <Drawer.Screen name="Réception" component={InboxScreen} options={{ title: '📥 Boîte de réception' }} />
         <Drawer.Screen name="Envoyés" component={SentScreen} options={{ title: '📤 Messages envoyés' }} />
+        <Drawer.Screen name="Sticker" component={StickerScreen} options={{ title: '🎨 Sticker' }} />
         <Drawer.Screen name="Admin" component={AdminScreen} options={{ title: '🔐 Admin' }} />
       </Drawer.Navigator>
     </NavigationContainer>

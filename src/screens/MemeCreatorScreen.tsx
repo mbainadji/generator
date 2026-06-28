@@ -1,3 +1,4 @@
+import { getAuth } from '@react-native-firebase/auth';
 import React, { useState, useEffect } from 'react';
 import {
   StyleSheet, Text, View, TextInput, TouchableOpacity,
@@ -172,9 +173,13 @@ export default function MemeCreatorScreen() {
     try {
       if (!viewShotRef.current || !viewShotRef.current.capture) return;
       const uri = await viewShotRef.current.capture();
+      const uid = getAuth().currentUser?.uid;
+      const replyLink = uid
+        ? `\n\n👀 Réponds-moi anonymement : https://meme-ictd-anonyme.web.app/msg/${uid}`
+        : '';
       await Share.open({
         title: 'Meme ICT202',
-        message: `🔥 ${memeResult?.topText} \n\n ${memeResult?.bottomText}`,
+        message: `🔥 ${memeResult?.topText} \n\n ${memeResult?.bottomText}${replyLink}`,
         url: Platform.OS === 'android' ? `file://${uri}` : uri,
         type: 'image/jpeg',
       });

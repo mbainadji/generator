@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Alert, Image } from 'react-native';
 import { signInWithGoogle } from '../firebaseAuth';
 
 const RED = '#D7263D';
@@ -22,7 +22,8 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>🎭 Meme App ICTD</Text>
+      <Image source={require('../../assets/logo.png')} style={styles.logo} resizeMode="contain" />
+      <Text style={styles.title}>Multimodal</Text>
       <Text style={styles.subtitle}>
         Connecte-toi pour créer des memes et recevoir des messages anonymes
       </Text>
@@ -39,6 +40,7 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: WHITE, justifyContent: 'center', alignItems: 'center', padding: 24 },
+  logo: { width: 120, height: 120, marginBottom: 16 },
   title: { fontSize: 24, fontWeight: '800', color: BLUE, marginBottom: 12, textAlign: 'center' },
   subtitle: { fontSize: 14, color: '#5C6B87', textAlign: 'center', marginBottom: 32 },
   button: { backgroundColor: RED, paddingVertical: 14, paddingHorizontal: 32, borderRadius: 999 },
