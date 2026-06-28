@@ -1,5 +1,6 @@
 package com.ictd202.memesapp
 
+import com.ictd202.memesapp.WhatsAppStickerPackage
 import android.app.Application
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication

@@ -1,18 +1,11 @@
 import React, { useState, useRef } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ScrollView, Image, Alert, Share
+  View, Text, TextInput, TouchableOpacity, ScrollView, Image, Alert
 } from 'react-native';
 import ViewShot from 'react-native-view-shot';
 import { launchImageLibrary } from 'react-native-image-picker';
-import Share2 from 'react-native-share';
-
-const BLUE = '#15397F';
-const RED = '#D7263D';
-const WHITE = '#FFFFFF';
-
-const COLORS = ['#FFFFFF', '#000000', '#FFD700', '#FF6B6B', '#4ECDC4', '#15397F', '#D7263D', '#2ECC71'];
-const BG_COLORS = ['transparent', '#FFD700', '#FF6B6B', '#4ECDC4', '#15397F', '#000000', '#FFFFFF', '#2ECC71'];
+import { styles, COLORS, BG_COLORS, WHITE } from './StickerScreen.styles';
+import { exportStickerPng, sendWebpToWhatsApp } from './StickerScreen.utils';
 
 export default function StickerScreen() {
   const viewShotRef = useRef<any>(null);
@@ -30,19 +23,8 @@ export default function StickerScreen() {
     });
   };
 
-  const exportSticker = async () => {
-    try {
-      if (!viewShotRef.current) return;
-      const uri = await viewShotRef.current.capture();
-      await Share2.open({
-        title: 'Sticker Multimodal',
-        url: `file://${uri}`,
-        type: 'image/png',
-      });
-    } catch (e) {
-      Alert.alert('Erreur', "Impossible d'exporter le sticker.");
-    }
-  };
+  const handleExport = () => exportStickerPng(viewShotRef);
+  const handleWhatsApp = () => sendWebpToWhatsApp(viewShotRef);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
@@ -137,38 +119,12 @@ export default function StickerScreen() {
       </View>
 
       {/* Export */}
-      <TouchableOpacity style={styles.exportBtn} onPress={exportSticker}>
-        <Text style={styles.exportBtnText}>📤 Exporter & Partager le Sticker</Text>
+      <TouchableOpacity style={styles.exportBtn} onPress={handleExport}>
+        <Text style={styles.exportBtnText}>📤 Exporter & Partager</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.exportBtn, { backgroundColor: '#25D366', marginTop: 10 }]} onPress={handleWhatsApp}>
+        <Text style={styles.exportBtnText}>💬 Envoyer comme Sticker WhatsApp</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: WHITE, padding: 16 },
-  title: { fontSize: 18, fontWeight: '800', color: BLUE, marginBottom: 16, marginTop: 8, textAlign: 'center' },
-  preview: {
-    width: 280, height: 280, alignSelf: 'center', borderRadius: 16,
-    justifyContent: 'center', alignItems: 'center', marginBottom: 16,
-    overflow: 'hidden', elevation: 4,
-  },
-  previewImage: { position: 'absolute', width: '100%', height: '100%' },
-  stickerText: { fontWeight: '900', textAlign: 'center', padding: 16, textShadowColor: 'rgba(0,0,0,0.3)', textShadowRadius: 4 },
-  card: { backgroundColor: '#F0F4FF', borderRadius: 12, padding: 16, marginBottom: 12 },
-  label: { fontSize: 13, fontWeight: '700', color: BLUE, marginBottom: 8 },
-  input: {
-    backgroundColor: WHITE, borderRadius: 8, padding: 12,
-    minHeight: 80, textAlignVertical: 'top', fontSize: 15, color: '#1a1a1a', marginBottom: 12,
-  },
-  sizeRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
-  sizeBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, backgroundColor: WHITE, borderWidth: 1, borderColor: BLUE },
-  sizeBtnActive: { backgroundColor: BLUE },
-  sizeBtnText: { color: BLUE, fontWeight: '700' },
-  colorRow: { flexDirection: 'row', gap: 10, flexWrap: 'wrap', marginBottom: 12 },
-  colorDot: { width: 32, height: 32, borderRadius: 16, borderWidth: 1, borderColor: '#ddd', justifyContent: 'center', alignItems: 'center' },
-  colorDotSelected: { borderWidth: 3, borderColor: RED },
-  btn: { backgroundColor: BLUE, padding: 12, borderRadius: 999, alignItems: 'center' },
-  btnText: { color: WHITE, fontWeight: '700' },
-  exportBtn: { backgroundColor: RED, padding: 16, borderRadius: 999, alignItems: 'center', marginTop: 8 },
-  exportBtnText: { color: WHITE, fontWeight: '800', fontSize: 15 },
-});
